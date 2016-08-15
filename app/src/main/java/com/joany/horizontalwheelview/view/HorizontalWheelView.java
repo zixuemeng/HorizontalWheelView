@@ -242,13 +242,15 @@ public class HorizontalWheelView extends View {
 
     private void doScroll(int delta) {
         lastScrollX += delta;
+        //此处以(width - padding,0)计算偏移
         if(width - padding + lastScrollX > 300 * 10
-                && width - padding + lastScrollX <= 300 * 10 + width/2) {
+                && width - padding + lastScrollX <= 300 * 10 + width/2 - padding) {
             offset = lastScrollX;
-        } else if(width - padding + lastScrollX > 300 * 10 + width/2) {
-            lastScrollX = 300 * 10 + width/2 - (width - padding);
+        } else if(width - padding + lastScrollX > 300 * 10 + width/2 - padding) {
+            lastScrollX = 300 * 10 + width/2 - padding- (width - padding);
             offset = lastScrollX;
         }else if (lastScrollX < 0 && lastScrollX >= -width/2 + padding) {
+            //此处以(0,0)计算偏移
             offset = -lastScrollX;
         } else if(lastScrollX < -width/2 + padding) {
             lastScrollX = -width/2 + padding;
