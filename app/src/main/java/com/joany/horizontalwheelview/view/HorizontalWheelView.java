@@ -248,10 +248,10 @@ public class HorizontalWheelView extends View {
         } else if(width - padding + lastScrollX > 300 * 10 + width/2) {
             lastScrollX = 300 * 10 + width/2 - (width - padding);
             offset = lastScrollX;
-        }else if (lastScrollX < 0 && lastScrollX >= -width/2) {
+        }else if (lastScrollX < 0 && lastScrollX >= -width/2 + padding) {
             offset = -lastScrollX;
-        } else if(lastScrollX < -width/2) {
-            lastScrollX = -width/2;
+        } else if(lastScrollX < -width/2 + padding) {
+            lastScrollX = -width/2 + padding;
             offset = -lastScrollX;
         }
         invalidate();
