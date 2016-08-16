@@ -2,6 +2,7 @@ package com.joany.horizontalwheelview.view;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Handler;
@@ -11,6 +12,8 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Scroller;
+
+import com.joany.horizontalwheelview.R;
 
 /**
  * Created by joany on 2016/8/15.
@@ -51,10 +54,6 @@ public class HorizontalWheelView extends View {
      * y坐标，以此为基准画y轴方向
      */
     private int y;
-    /**
-     * 缺省高度
-     */
-    private int defaultHeightValue = 150;
 
     /**
      * 手势检测器
@@ -71,6 +70,15 @@ public class HorizontalWheelView extends View {
      */
     private int padding = 10;
 
+    /**
+     * 缺省高度
+     */
+    private int defaultHeightValue = 150;
+
+    private int maxValue;
+    private int minValue;
+    private int lineColor;
+
     private int offset;
 
     public HorizontalWheelView(Context context) {
@@ -83,6 +91,13 @@ public class HorizontalWheelView extends View {
 
     public HorizontalWheelView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        TypedArray ar = context.obtainStyledAttributes(attrs, R.styleable.HorizontalWheelView);
+        minValue = ar.getInt(R.styleable.HorizontalWheelView_minValue,0);
+        minValue = minValue%10==0 ? minValue:0;
+        maxValue = ar.getInt(R.styleable.HorizontalWheelView_maxValue,200);
+        lineColor = ar.getColor(R.styleable.HorizontalWheelView_lineColor,
+                context.getResources().getColor(R.color.black));
+        ar.recycle();
         init(context);
     }
 
@@ -92,27 +107,27 @@ public class HorizontalWheelView extends View {
         linePaint.setAntiAlias(true);
         linePaint.setStyle(Paint.Style.STROKE);
         linePaint.setStrokeWidth(2);
-        linePaint.setColor(0xff999999);
+        linePaint.setColor(lineColor);
 
         verticalPaint = new Paint();
         verticalPaint.setAntiAlias(true);
         verticalPaint.setStyle(Paint.Style.STROKE);
         verticalPaint.setStrokeWidth(2);
-        verticalPaint.setColor(0xff999999);
+        verticalPaint.setColor(lineColor);
 
         textPaint = new Paint();
         textPaint.setAntiAlias(true);
         textPaint.setStrokeWidth(2);
         textPaint.setTextAlign(Paint.Align.CENTER);
         textPaint.setTextSize(30);
-        textPaint.setColor(0xff999999);
+        textPaint.setColor(lineColor);
 
         valuePaint = new Paint();
         valuePaint.setAntiAlias(true);
         valuePaint.setStrokeWidth(3);
         valuePaint.setTextAlign(Paint.Align.CENTER);
         valuePaint.setTextSize(60);
-        valuePaint.setColor(0xff999999);
+        valuePaint.setColor(lineColor);
 
         gestureDetector = new GestureDetector(context, simpleOnGestureListener);
     }
@@ -148,16 +163,16 @@ public class HorizontalWheelView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (lastScrollX >= 0 && width - padding + lastScrollX <= 300 * 10) {
+        if (lastScrollX >= 0 && width - padding + lastScrollX <= maxValue * 10) {
             //正常滑动
             canvas.drawLine(0, y, width, y, linePaint);
-            canvas.drawText((width / 2 - padding + lastScrollX) / 10 + "",
+            canvas.drawText((width / 2 - padding + lastScrollX) / 10 + minValue+"",
                     width / 2, y - 80, valuePaint);
             for (int start = padding; start <= width - padding; start++) {
                 int top = y - 10;
                 if ((start - padding + lastScrollX) % (10 * 10) == 0) {
                     top = top - 20;
-                    canvas.drawText((start - padding + lastScrollX) / 10 + "",
+                    canvas.drawText((start - padding + lastScrollX) / 10 + minValue+"",
                             start, top - 8, textPaint);
                 }
                 if ((start - padding + lastScrollX) % 10 == 0) {
@@ -167,13 +182,13 @@ public class HorizontalWheelView extends View {
         } else if (lastScrollX < 0) {
             //0点右划至中点
             canvas.drawLine(offset, y, width, y, linePaint);
-            canvas.drawText((width / 2 - padding - offset) / 10 + "",
+            canvas.drawText((width / 2 - padding - offset) / 10 + minValue+"",
                     width / 2, y - 80, valuePaint);
             for (int start = offset + padding; start <= width - padding; start++) {
                 int top = y - 10;
                 if ((start - offset - padding) % (10 * 10) == 0) {
                     top = top - 20;
-                    canvas.drawText((start - offset - padding) / 10 + "",
+                    canvas.drawText((start - offset - padding) / 10 + minValue+"",
                             start, top - 8, textPaint);
                 }
                 if ((start - offset - padding) % 10 == 0) {
@@ -182,16 +197,18 @@ public class HorizontalWheelView extends View {
             }
         } else {
             //终点左划至中点
-            canvas.drawLine(0, y, width - (width - padding + lastScrollX - 300 * 10), y, linePaint);
-            canvas.drawText((width / 2 - padding + offset) / 10 + "",
+            canvas.drawLine(0, y,
+                    width - (width - padding + lastScrollX- (maxValue-minValue) * 10),
+                    y, linePaint);
+            canvas.drawText((width / 2 - padding + offset) / 10 + minValue+"",
                     width / 2, y - 80, valuePaint);
             for (int start = padding;
-                 start <= width - padding - (width - padding + lastScrollX - 300 * 10);
+                 start <= width - padding - (width - padding + lastScrollX - (maxValue-minValue) * 10);
                  start++) {
                 int top = y - 10;
                 if ((start - padding + offset) % (10 * 10) == 0) {
                     top = top - 20;
-                    canvas.drawText((start - padding + offset) / 10 + "",
+                    canvas.drawText((start - padding + offset) / 10 + minValue+"",
                             start, top - 8, textPaint);
                 }
                 if ((start - padding + offset) % 10 == 0) {
@@ -240,11 +257,11 @@ public class HorizontalWheelView extends View {
     private void doScroll(int delta) {
         lastScrollX += delta;
         //此处以(width - padding,0)计算偏移
-        if (width - padding + lastScrollX > 300 * 10
-                && width - padding + lastScrollX <= 300 * 10 + width / 2 - padding) {
+        if (width - padding + lastScrollX> (maxValue - minValue) * 10
+                && width - padding + lastScrollX<=( maxValue - minValue)* 10 + width / 2 - padding) {
             offset = lastScrollX;
-        } else if (width - padding + lastScrollX > 300 * 10 + width / 2 - padding) {
-            lastScrollX = 300 * 10 + width / 2 - padding - (width - padding);
+        } else if (width - padding + lastScrollX> (maxValue-minValue) * 10 + width / 2 - padding) {
+            lastScrollX = (maxValue -minValue)* 10 + width / 2 - padding - (width - padding);
             offset = lastScrollX;
         } else if (lastScrollX < 0 && lastScrollX >= -width / 2 + padding) {
             //此处以(0,0)计算偏移
