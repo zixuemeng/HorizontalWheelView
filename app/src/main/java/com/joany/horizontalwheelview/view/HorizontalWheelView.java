@@ -148,7 +148,7 @@ public class HorizontalWheelView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if(lastScrollX >= 0 && width - padding + lastScrollX <=  300 * 10) {
+        if (lastScrollX >= 0 && width - padding + lastScrollX <= 300 * 10) {
             //正常滑动
             canvas.drawLine(0, y, width, y, linePaint);
             canvas.drawText((width / 2 - padding + lastScrollX) / 10 + "",
@@ -164,10 +164,10 @@ public class HorizontalWheelView extends View {
                     canvas.drawLine(start, y, start, top, verticalPaint);
                 }
             }
-        } else if(lastScrollX < 0){
+        } else if (lastScrollX < 0) {
             //0点右划至中点
-            canvas.drawLine(offset,y,width,y,linePaint);
-            canvas.drawText((width/ 2 - padding- offset) / 10 + "",
+            canvas.drawLine(offset, y, width, y, linePaint);
+            canvas.drawText((width / 2 - padding - offset) / 10 + "",
                     width / 2, y - 80, valuePaint);
             for (int start = offset + padding; start <= width - padding; start++) {
                 int top = y - 10;
@@ -182,8 +182,8 @@ public class HorizontalWheelView extends View {
             }
         } else {
             //终点左划至中点
-            canvas.drawLine(0,y,width - (width - padding + lastScrollX - 300 * 10),y,linePaint);
-            canvas.drawText((width/ 2 - padding + offset) / 10 + "",
+            canvas.drawLine(0, y, width - (width - padding + lastScrollX - 300 * 10), y, linePaint);
+            canvas.drawText((width / 2 - padding + offset) / 10 + "",
                     width / 2, y - 80, valuePaint);
             for (int start = padding;
                  start <= width - padding - (width - padding + lastScrollX - 300 * 10);
@@ -194,7 +194,7 @@ public class HorizontalWheelView extends View {
                     canvas.drawText((start - padding + offset) / 10 + "",
                             start, top - 8, textPaint);
                 }
-                if ((start - padding +offset) % 10 == 0) {
+                if ((start - padding + offset) % 10 == 0) {
                     canvas.drawLine(start, y, start, top, verticalPaint);
                 }
             }
@@ -204,6 +204,7 @@ public class HorizontalWheelView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (!gestureDetector.onTouchEvent(event) && event.getAction() == MotionEvent.ACTION_UP) {
+            //justify for text wheelview
         }
         return true;
     }
@@ -222,11 +223,7 @@ public class HorizontalWheelView extends View {
 
         @Override
         public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-            if (distanceX > 0) {
-                isLeft = true;
-            } else {
-                isLeft = false;
-            }
+            isLeft = distanceX > 0;
             startScrolling();
             doScroll((int) distanceX);
             return true;
@@ -243,17 +240,17 @@ public class HorizontalWheelView extends View {
     private void doScroll(int delta) {
         lastScrollX += delta;
         //此处以(width - padding,0)计算偏移
-        if(width - padding + lastScrollX > 300 * 10
-                && width - padding + lastScrollX <= 300 * 10 + width/2 - padding) {
+        if (width - padding + lastScrollX > 300 * 10
+                && width - padding + lastScrollX <= 300 * 10 + width / 2 - padding) {
             offset = lastScrollX;
-        } else if(width - padding + lastScrollX > 300 * 10 + width/2 - padding) {
-            lastScrollX = 300 * 10 + width/2 - padding- (width - padding);
+        } else if (width - padding + lastScrollX > 300 * 10 + width / 2 - padding) {
+            lastScrollX = 300 * 10 + width / 2 - padding - (width - padding);
             offset = lastScrollX;
-        }else if (lastScrollX < 0 && lastScrollX >= -width/2 + padding) {
+        } else if (lastScrollX < 0 && lastScrollX >= -width / 2 + padding) {
             //此处以(0,0)计算偏移
             offset = -lastScrollX;
-        } else if(lastScrollX < -width/2 + padding) {
-            lastScrollX = -width/2 + padding;
+        } else if (lastScrollX < -width / 2 + padding) {
+            lastScrollX = -width / 2 + padding;
             offset = -lastScrollX;
         }
         invalidate();
@@ -271,11 +268,6 @@ public class HorizontalWheelView extends View {
         handler.removeMessages(MESSAGE_SCROLL);
     }
 
-    /**
-     * 滑动的相对距离，向左划为正，向右划为负
-     */
-    private int delta;
-
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         @Override
@@ -284,6 +276,8 @@ public class HorizontalWheelView extends View {
             //相对scroller.fling中设置的起始坐标为(lastScrollX,0) X方向上的绝对值
             int currX = scroller.getCurrX();
 
+//          滑动的相对距离，向左划为正，向右划为负
+            int delta;
             if (isLeft) {
                 delta = currX;
             } else {
