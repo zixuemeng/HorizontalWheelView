@@ -75,9 +75,23 @@ public class HorizontalWheelView extends View {
      */
     private int defaultHeightValue = 150;
 
+    /**
+     *刻度最大值
+     */
     private int maxValue;
+    /**
+     * 刻度最小值
+     */
     private int minValue;
+    /**
+     * 线条颜色
+     */
     private int lineColor;
+
+    /**
+     * 两个小刻度间的水平间隔
+     */
+    private int splitPixel;
 
     private int offset;
 
@@ -97,6 +111,8 @@ public class HorizontalWheelView extends View {
         maxValue = ar.getInt(R.styleable.HorizontalWheelView_maxValue,200);
         lineColor = ar.getColor(R.styleable.HorizontalWheelView_lineColor,
                 context.getResources().getColor(R.color.black));
+        padding = ar.getInt(R.styleable.HorizontalWheelView_padding,10);
+        splitPixel = ar.getInt(R.styleable.HorizontalWheelView_splitPixel,10);
         ar.recycle();
         init(context);
     }
@@ -163,14 +179,15 @@ public class HorizontalWheelView extends View {
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (lastScrollX >= 0 && width - padding + lastScrollX <= maxValue * 10) {
+        if (lastScrollX >= 0 && (width - padding) - padding + lastScrollX
+                <= (maxValue-minValue) * splitPixel) {
             //正常滑动
             canvas.drawLine(0, y, width, y, linePaint);
             canvas.drawText((width / 2 - padding + lastScrollX) / 10 + minValue+"",
                     width / 2, y - 80, valuePaint);
             for (int start = padding; start <= width - padding; start++) {
                 int top = y - 10;
-                if ((start - padding + lastScrollX) % (10 * 10) == 0) {
+                if ((start - padding + lastScrollX) % (10 * splitPixel) == 0) {
                     top = top - 20;
                     canvas.drawText((start - padding + lastScrollX) / 10 + minValue+"",
                             start, top - 8, textPaint);
@@ -186,7 +203,7 @@ public class HorizontalWheelView extends View {
                     width / 2, y - 80, valuePaint);
             for (int start = offset + padding; start <= width - padding; start++) {
                 int top = y - 10;
-                if ((start - offset - padding) % (10 * 10) == 0) {
+                if ((start - offset - padding) % (10 * splitPixel) == 0) {
                     top = top - 20;
                     canvas.drawText((start - offset - padding) / 10 + minValue+"",
                             start, top - 8, textPaint);
@@ -198,15 +215,17 @@ public class HorizontalWheelView extends View {
         } else {
             //终点左划至中点
             canvas.drawLine(0, y,
-                    width - (width - padding + lastScrollX- (maxValue-minValue) * 10),
+                    width - ((width - padding)
+                            - padding + lastScrollX- (maxValue - minValue) * splitPixel),
                     y, linePaint);
             canvas.drawText((width / 2 - padding + offset) / 10 + minValue+"",
                     width / 2, y - 80, valuePaint);
             for (int start = padding;
-                 start <= width - padding - (width - padding + lastScrollX - (maxValue-minValue) * 10);
+                 start <= width - padding - ((width - padding)
+                         - padding + lastScrollX - (maxValue - minValue) * splitPixel);
                  start++) {
                 int top = y - 10;
-                if ((start - padding + offset) % (10 * 10) == 0) {
+                if ((start - padding + offset) % (10 * splitPixel) == 0) {
                     top = top - 20;
                     canvas.drawText((start - padding + offset) / 10 + minValue+"",
                             start, top - 8, textPaint);
@@ -257,11 +276,14 @@ public class HorizontalWheelView extends View {
     private void doScroll(int delta) {
         lastScrollX += delta;
         //此处以(width - padding,0)计算偏移
-        if (width - padding + lastScrollX> (maxValue - minValue) * 10
-                && width - padding + lastScrollX<=( maxValue - minValue)* 10 + width / 2 - padding) {
+        if ((width - padding) - padding + lastScrollX> (maxValue - minValue) * splitPixel
+                && width - padding + lastScrollX
+                <=( maxValue - minValue)* splitPixel + width / 2 - padding) {
             offset = lastScrollX;
-        } else if (width - padding + lastScrollX> (maxValue-minValue) * 10 + width / 2 - padding) {
-            lastScrollX = (maxValue -minValue)* 10 + width / 2 - padding - (width - padding);
+        } else if ((width - padding) - padding + lastScrollX>
+                (maxValue-minValue) * splitPixel + width / 2 - padding) {
+            lastScrollX = (maxValue -minValue)* splitPixel
+                    + width / 2 - padding - (width - padding) + padding;
             offset = lastScrollX;
         } else if (lastScrollX < 0 && lastScrollX >= -width / 2 + padding) {
             //此处以(0,0)计算偏移

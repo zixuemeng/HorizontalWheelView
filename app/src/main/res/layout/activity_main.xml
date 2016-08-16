@@ -9,6 +9,8 @@
         android:layout_width="300dp"
         android:layout_height="80dp"
         horizontalWheelView:minValue="30"
-        horizontalWheelView:maxValue="300"
-        horizontalWheelView:lineColor="#ff000000"/>
+        horizontalWheelView:maxValue="200"
+        horizontalWheelView:lineColor="#ff000000"
+        horizontalWheelView:splitPixel="10"
+        horizontalWheelView:padding="20"/>
 </LinearLayout>

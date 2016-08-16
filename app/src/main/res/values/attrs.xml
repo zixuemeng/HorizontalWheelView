@@ -4,5 +4,7 @@
         <attr name="minValue" format="integer"/>
         <attr name="maxValue" format="integer"/>
         <attr name="lineColor" format="color"/>
+        <attr name="padding" format="integer"/>
+        <attr name="splitPixel" format="integer"/>
     </declare-styleable>
 </resources>
